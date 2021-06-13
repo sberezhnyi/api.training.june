@@ -1,0 +1,49 @@
+### Logs ###
+*.log
+
+### STS/Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.metadata
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
+
+### VS Code ###
+.vscode
+
+### Build output directies ###
+/bin
+/target
+*/target
+/build
+*/build
+
+### OS generated files ###
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+### Packages ###
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+### Allure ###
+/allure-result*
+allure-result
