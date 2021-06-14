@@ -1,6 +1,7 @@
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
@@ -58,10 +59,14 @@ public class PostGoRestTest {
                 .statusCode(HTTP_OK)
                 .extract()
                 .response()
-                .as(UserPostResponse.class);
+                .as(UserPostResponse.class, ObjectMapperType.JACKSON_2);
 
 
         log.info(response.getData().getId());
+        log.info(response.getData().getName());
+
+        log.info(response.getData().getCreatedAt());
+        log.info(response.getData().getUpdatedAt());
 
     }
 }
