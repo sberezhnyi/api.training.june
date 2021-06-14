@@ -26,18 +26,24 @@ public class GoRestTest {
 
     private String id;
 
-    @BeforeClass
-    public void setUp(){
-        RestAssured.requestSpecification = setRequestSpec();
-    }
+    //    @BeforeClass
+    //    public void setUp(){
+    //        RestAssured.requestSpecification = setRequestSpec();
+    //    }
 
     private RequestSpecification setRequestSpec() {
 
         return new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
                 .setBaseUri(host)
                 .setBasePath(apiPath)
                 .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+    }
+
+    private RequestSpecification setRequestSpecExtraHeader() {
+
+        return new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
                 .build();
     }
 
@@ -47,6 +53,7 @@ public class GoRestTest {
         given()
                 .log().all()
                 .spec(setRequestSpec())
+                .spec(setRequestSpecExtraHeader())
                 .get(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_OK)
@@ -60,7 +67,6 @@ public class GoRestTest {
     public void getAllOptions() {
 
         List allowMethods = given(setRequestSpec())
-                .log().all()
                 .options(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_NO_CONTENT)
