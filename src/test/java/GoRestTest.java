@@ -23,10 +23,12 @@ public class GoRestTest {
     public void getUsers() {
 
         given()
+                .log()
+                .everything()
                 .baseUri(host)
                 .basePath(apiPath)
                 .header("Authorization", "Bearer " + token)
-                .request(Method.TRACE, endPoint)
+                .request("TRACE", endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_BAD_METHOD)
                 .extract()
