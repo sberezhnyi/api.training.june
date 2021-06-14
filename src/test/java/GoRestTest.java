@@ -1,3 +1,4 @@
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import groovy.util.logging.Slf4j;
@@ -5,7 +6,6 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.config.EncoderConfig;
-import io.restassured.config.HttpClientConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
@@ -13,7 +13,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.net.HttpURLConnection;
 import java.util.List;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpHeaders;
 import org.testng.annotations.BeforeClass;
@@ -21,34 +20,34 @@ import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static util.PropertiesLoader.API_PATH;
+import static util.PropertiesLoader.HOST;
+import static util.PropertiesLoader.TOKEN;
 
 @Slf4j
 public class GoRestTest {
 
-    private String host = "https://gorest.co.in";
-    private String apiPath = "/public-api";
     private String endPoint = "/users";
-    private String userName = "Howdy!";
-    private String password = "";
-    private String token = "961e012678428d7ab28fb987546cb5a39a8d3445cacce0a38a93b3d5d6db40ff";
-
     private String id;
 
     @BeforeClass
-    public void setUp() {
+    public void setUp(){
         RestAssured.config = RestAssured.config()
-                .encoderConfig(EncoderConfig.encoderConfig()
-                                       .appendDefaultContentCharsetToContentTypeIfUndefined(false)
+                .encoderConfig(
+                        EncoderConfig.encoderConfig()
+                                .appendDefaultContentCharsetToContentTypeIfUndefined(false)
 
                 )
-                .objectMapperConfig(new ObjectMapperConfig()
-                                            //upper camel case for variable names in dto classes for GSON objects
-                                            .gsonObjectMapperFactory(
-                                                    (type, s) -> new GsonBuilder().setFieldNamingPolicy(
-                                                            FieldNamingPolicy.UPPER_CAMEL_CASE)
-                                                            .create()
+                .objectMapperConfig(
+                        new ObjectMapperConfig()
+                                //upper camel case for variable names in dto classes for GSON objects
+                                .gsonObjectMapperFactory((type, s) ->
+                                                                 new GsonBuilder()
+                                                                         .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                                                                         .create()
 
-                                            ));
+                                )
+                );
 
         //to extract body from response as json for assertion
         RestAssured.registerParser("text/plain", Parser.JSON);
@@ -58,28 +57,32 @@ public class GoRestTest {
 
     private RequestSpecification setRequestSpec() {
 
-        return new RequestSpecBuilder().setBaseUri(host)
-                .setBasePath(apiPath)
-                .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        return new RequestSpecBuilder()
+                .setBaseUri(HOST)
+                .setBasePath(API_PATH)
+                .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN)
                 .build();
     }
 
     private RequestSpecification setRequestSpecExtraHeader() {
 
-        return new RequestSpecBuilder().setContentType(ContentType.JSON)
+        return new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
                 .build();
     }
 
     private ResponseSpecification setResponseSpec() {
 
-        return new ResponseSpecBuilder().expectStatusCode(HTTP_OK)
+        return new ResponseSpecBuilder()
+                .expectStatusCode(HTTP_OK)
                 .build();
     }
 
     @Test
     public void getUsers() {
 
-        given().spec(setRequestSpec())
+        given()
+                .spec(setRequestSpec())
                 .expect()
                 .spec(setResponseSpec())
                 .when()
@@ -90,10 +93,13 @@ public class GoRestTest {
                 .prettyPrint();
     }
 
+
     @Test    // ISSUE!!! Access-Control-Allow-Methods is not present in response
     public void getAllOptions() {
 
-        List allowMethods = given(setRequestSpec()).options(endPoint)
+        List allowMethods = given(setRequestSpec())
+                .contentType(ContentType.JSON)
+                .options(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_NO_CONTENT)
                 .extract()
@@ -108,10 +114,16 @@ public class GoRestTest {
     public void postUser() {
 
         String generatedString = RandomStringUtils.random(10, true, false);
-        String body = "{\n" + "\"email\" : \"" + generatedString + "@gmail.com\",\n" + "\"name\" : \"Pan Test\",\n"
-                + "\"gender\" : \"Male\",\n" + "\"status\" : \"Active\"\n" + "}";
+        String body = "{"
+                + "\"email\" : \"" + generatedString + "@gmail.com\",\n"
+                + "\"name\" : \"Pan Test\",\n"
+                + "\"gender\" : \"Male\",\n"
+                + "\"status\" : \"Active\"\n"
+                + "}";
 
-        id = given().body(body)
+        id = given(setRequestSpec())
+                .contentType(ContentType.JSON)
+                .body(body)
                 .post(endPoint)
                 .then()
                 .statusCode(HTTP_OK)
@@ -127,9 +139,12 @@ public class GoRestTest {
     @Test     // ISSUE Patch with null - ok
     public void patchUser() {
 
-        String body = "{\n" + "\"name\" : \"Pan U\"\n" + "}";
+        String body = "{\n"
+                + "\"name\" : \"Pan U\"\n"
+                + "}";
 
-        given().body(body)
+        given(setRequestSpec())
+                .body(body)
                 .patch(endPoint + "/" + id)
                 .then()
                 .statusCode(HTTP_OK)
@@ -139,4 +154,5 @@ public class GoRestTest {
                 .getString("data.id");
 
     }
+
 }
