@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
+import util.User;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpHeaders;
@@ -41,16 +42,16 @@ public class PostGoRestTest {
     public void postUser() {
 
         String generatedString = RandomStringUtils.random(10, true, false);
-        String body = "{"
-                + "\"email\" : \"" + generatedString + "@gmail.com\",\n"
-                + "\"name\" : \"Pan Test\",\n"
-                + "\"gender\" : \"Male\",\n"
-                + "\"status\" : \"Active\"\n"
-                + "}";
+
+        User newUser = new User();
+        newUser.setEmail(generatedString + "@gmail.com");
+        newUser.setName("Sergii Berezhnyi");
+        newUser.setGender("Male");
+        newUser.setStatus("Active");
 
         id = given(setRequestSpec())
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(newUser)
                 .post(endPoint)
                 .then()
                 .statusCode(HTTP_OK)
