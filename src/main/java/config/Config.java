@@ -1,3 +1,5 @@
+package config;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import io.restassured.RestAssured;

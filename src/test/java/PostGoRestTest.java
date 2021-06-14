@@ -4,7 +4,8 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
-import util.User;
+import request.User;
+import response.UserPostResponse;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpHeaders;
@@ -49,7 +50,7 @@ public class PostGoRestTest {
         newUser.setGender("Male");
         newUser.setStatus("Active");
 
-        id = given(setRequestSpec())
+        UserPostResponse response = given(setRequestSpec())
                 .contentType(ContentType.JSON)
                 .body(newUser)
                 .post(endPoint)
@@ -57,10 +58,10 @@ public class PostGoRestTest {
                 .statusCode(HTTP_OK)
                 .extract()
                 .response()
-                .jsonPath()
-                .getString("data.id");
+                .as(UserPostResponse.class);
 
-        log.info(id);
+
+        log.info(response.getData().getId());
 
     }
 }
