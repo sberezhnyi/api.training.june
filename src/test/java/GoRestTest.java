@@ -1,9 +1,12 @@
 import java.net.HttpURLConnection;
 import java.util.List;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.http.HttpHeaders;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
@@ -21,14 +24,20 @@ public class GoRestTest {
 
     private String id;
 
+    private RequestSpecification setRequestSpec() {
+
+        return new RequestSpecBuilder().setContentType(ContentType.JSON)
+                .setBaseUri(host)
+                .setBasePath(apiPath)
+                .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+    }
+
     @Test
     public void getUsers() {
 
-        given()
-                .log().everything()
-                .baseUri(host)
-                .basePath(apiPath)
-                .header("Authorization", "Bearer " + token)
+        given(setRequestSpec())
+                .log().all()
                 .get(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_OK)
@@ -41,11 +50,8 @@ public class GoRestTest {
     @Test    // ISSUE!!! Access-Control-Allow-Methods is not present in response
     public void getAllOptions() {
 
-        List allowMethods = given()
-                .log().everything()
-                .baseUri(host)
-                .basePath(apiPath)
-                .header("Authorization", "Bearer " + token)
+        List allowMethods = given(setRequestSpec())
+                .log().all()
                 .options(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_NO_CONTENT)
@@ -68,12 +74,8 @@ public class GoRestTest {
                 + "\"status\" : \"Active\"\n"
                 + "}";
 
-        id = given()
-                .log().everything()
-                .baseUri(host)
-                .basePath(apiPath)
-                .header("Authorization", "Bearer " + token)
-                .contentType(ContentType.JSON)
+        id = given(setRequestSpec())
+                .log().all()
                 .body(body)
                 .post(endPoint)
                 .then()
@@ -94,12 +96,8 @@ public class GoRestTest {
                 + "\"name\" : \"Pan U\"\n"
                 + "}";
 
-        given()
-                .log().everything()
-                .baseUri(host)
-                .basePath(apiPath)
-                .header("Authorization", "Bearer " + token)
-                .contentType(ContentType.JSON)
+        given(setRequestSpec())
+                .log().all()
                 .body(body)
                 .patch(endPoint + "/" + id)
                 .then()
