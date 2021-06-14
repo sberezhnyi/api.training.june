@@ -1,6 +1,6 @@
 import java.net.HttpURLConnection;
 import io.restassured.http.ContentType;
-import io.restassured.http.Cookies;
+import io.restassured.http.Method;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,9 +26,9 @@ public class GoRestTest {
                 .baseUri(host)
                 .basePath(apiPath)
                 .header("Authorization", "Bearer " + token)
-                .get(endPoint)
+                .request(Method.TRACE, endPoint)
                 .then()
-                .statusCode(HttpURLConnection.HTTP_OK)
+                .statusCode(HttpURLConnection.HTTP_BAD_METHOD)
                 .extract()
                 .response()
                 .prettyPrint();
