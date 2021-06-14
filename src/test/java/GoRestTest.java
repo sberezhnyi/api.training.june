@@ -1,5 +1,5 @@
 import java.net.HttpURLConnection;
-import io.restassured.http.ContentType;
+import io.restassured.http.Cookies;
 import lombok.extern.log4j.Log4j2;
 
 import org.testng.annotations.Test;
@@ -17,19 +17,29 @@ public class GoRestTest {
     private String token = "961e012678428d7ab28fb987546cb5a39a8d3445cacce0a38a93b3d5d6db40ff";
 
 
+    public Cookies getCookies(){
+        return given()
+                .log().everything()
+                .baseUri(host)
+                .basePath(apiPath)
+                .auth()
+                .basic(userName, password)
+                .get(endPoint)
+                .then()
+                .statusCode(HttpURLConnection.HTTP_OK)
+                .extract()
+                .response()
+                .detailedCookies();
+    }
+
     @Test
     public void getUsers() {
 
         given()
-                .log()
-                .everything()
+                .log().everything()
                 .baseUri(host)
                 .basePath(apiPath)
-                .header("Authorization", "Bearer " + token)
-                .header("Connection", "keep-alive")
-                .header("Accept-Encoding", "gzip, deflate, br")
-                .contentType(ContentType.JSON)
-                .accept("*/*")
+                .cookies(getCookies())
                 .get(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_OK)
