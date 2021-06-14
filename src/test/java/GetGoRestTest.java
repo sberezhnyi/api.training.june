@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 import static util.PropertiesLoader.API_PATH;
 import static util.PropertiesLoader.HOST;
 import static util.PropertiesLoader.TOKEN;
@@ -67,5 +68,19 @@ public class GetGoRestTest {
                 .log().ifValidationFails()
                 .assertThat()
                 .body("data.name", equalTo("Adhiraj Patel"));
+    }
+
+    @Test
+    public void validateUsersContainsActiveFemale() {
+
+        given()
+                .spec(setRequestSpec())
+                .expect()
+                .spec(setResponseSpec())
+                .when()
+                .get(endPoint)
+                .then()
+                .assertThat()
+                .body("data.findAll { it.gender != 'Male'}.status", hasItems("Active"));
     }
 }
