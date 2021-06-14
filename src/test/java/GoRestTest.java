@@ -1,6 +1,6 @@
 import java.net.HttpURLConnection;
+import java.util.List;
 import io.restassured.http.ContentType;
-import io.restassured.http.Method;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,27 +16,46 @@ public class GoRestTest {
     private String endPoint = "/users";
     private String userName = "Howdy!";
     private String password = "";
-    private String token = "961e012678428d7ab28fb987546cb5a39a8d3445cacce0a38a93b3d5d6db40ff";
+    private String token = "d8ff4ebb9c20f22faaa4c5ec8ea3cd36ee17f57e9c3d2d6eec592f6000daa72a";
 
+
+    private String id;
 
     @Test
     public void getUsers() {
 
         given()
-                .log()
-                .everything()
+                .log().everything()
                 .baseUri(host)
                 .basePath(apiPath)
                 .header("Authorization", "Bearer " + token)
-                .request("TRACE", endPoint)
+                .get(endPoint)
                 .then()
-                .statusCode(HttpURLConnection.HTTP_BAD_METHOD)
+                .statusCode(HttpURLConnection.HTTP_OK)
                 .extract()
                 .response()
                 .prettyPrint();
     }
 
 
+    @Test    // ISSUE!!! Access-Control-Allow-Methods is not present in response
+    public void getAllOptions() {
+
+        List allowMethods = given()
+                .log().everything()
+                .baseUri(host)
+                .basePath(apiPath)
+                .header("Authorization", "Bearer " + token)
+                .options(endPoint)
+                .then()
+                .statusCode(HttpURLConnection.HTTP_NO_CONTENT)
+                .extract()
+                .headers()
+                .asList();
+
+        System.out.println(allowMethods);
+
+    }
 
     @Test
     public void postUser() {
@@ -49,9 +68,8 @@ public class GoRestTest {
                 + "\"status\" : \"Active\"\n"
                 + "}";
 
-        given()
-                .log()
-                .everything()
+        id = given()
+                .log().everything()
                 .baseUri(host)
                 .basePath(apiPath)
                 .header("Authorization", "Bearer " + token)
@@ -62,7 +80,35 @@ public class GoRestTest {
                 .statusCode(HttpURLConnection.HTTP_OK)
                 .extract()
                 .response()
-                .prettyPrint();
+                .jsonPath()
+                .getString("data.id");
+
+        System.out.println(id);
 
     }
+
+    @Test     // ISSUE Patch with null - ok
+    public void patchUser() {
+
+        String body = "{\n"
+                + "\"name\" : \"Pan U\"\n"
+                + "}";
+
+        given()
+                .log().everything()
+                .baseUri(host)
+                .basePath(apiPath)
+                .header("Authorization", "Bearer " + token)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .patch(endPoint + "/" + id)
+                .then()
+                .statusCode(HttpURLConnection.HTTP_OK)
+                .extract()
+                .response()
+                .jsonPath()
+                .getString("data.id");
+
+    }
+
 }
