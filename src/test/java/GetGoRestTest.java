@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static util.PropertiesLoader.API_PATH;
 import static util.PropertiesLoader.HOST;
 import static util.PropertiesLoader.TOKEN;
@@ -50,5 +51,21 @@ public class GetGoRestTest {
                 .getString("data[0].id");
 
         System.out.println(id);
+    }
+
+
+    @Test
+    public void getUserById() {
+
+        given()
+                .spec(setRequestSpec())
+                .expect()
+                .spec(setResponseSpec())
+                .when()
+                .get(endPoint + "/24")
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .body("data.name", equalTo("Adhiraj Patel"));
     }
 }
