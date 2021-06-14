@@ -1,5 +1,6 @@
 import java.net.HttpURLConnection;
 import java.util.List;
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -7,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpHeaders;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
@@ -24,9 +26,15 @@ public class GoRestTest {
 
     private String id;
 
+    @BeforeClass
+    public void setUp(){
+        RestAssured.requestSpecification = setRequestSpec();
+    }
+
     private RequestSpecification setRequestSpec() {
 
-        return new RequestSpecBuilder().setContentType(ContentType.JSON)
+        return new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
                 .setBaseUri(host)
                 .setBasePath(apiPath)
                 .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -36,8 +44,9 @@ public class GoRestTest {
     @Test
     public void getUsers() {
 
-        given(setRequestSpec())
+        given()
                 .log().all()
+                .spec(setRequestSpec())
                 .get(endPoint)
                 .then()
                 .statusCode(HttpURLConnection.HTTP_OK)
@@ -74,8 +83,7 @@ public class GoRestTest {
                 + "\"status\" : \"Active\"\n"
                 + "}";
 
-        id = given(setRequestSpec())
-                .log().all()
+        id = given()
                 .body(body)
                 .post(endPoint)
                 .then()
@@ -96,8 +104,7 @@ public class GoRestTest {
                 + "\"name\" : \"Pan U\"\n"
                 + "}";
 
-        given(setRequestSpec())
-                .log().all()
+        given()
                 .body(body)
                 .patch(endPoint + "/" + id)
                 .then()
